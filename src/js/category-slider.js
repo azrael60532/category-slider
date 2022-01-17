@@ -51,7 +51,10 @@ function getSlideTotalW(element) {
   const items = slideWrap.querySelectorAll('.item');
   let slideTotalWidth = 0; //輪播內容總寬度
   items.forEach((item) => {
-    slideTotalWidth += item.offsetWidth;
+    const style = getComputedStyle(item);
+    const marginL = parseInt(style.marginLeft);
+    const marginR = parseInt(style.marginRight);
+    slideTotalWidth += item.offsetWidth + marginL + marginR;
   });
   return slideTotalWidth;
 }
@@ -109,7 +112,7 @@ function eventHandler(self) {
         moveDistance = e.changedTouches[0].pageX - self.startX;
         break;
     }
-    if (moveDistance === 0) {
+    if (moveDistance === 0 && e.target.closest('.item')) {
       if (operateEnd === 'mouseup' && e.button !== 0) return;
       const items = slideWrap.querySelectorAll('.item');
       items.forEach((item) => {
@@ -190,7 +193,7 @@ export class CategorySlider {
       Math.abs(getSlideTotalW(this.el) - this.el.querySelector('.wrapper').offsetWidth)
     );
     this.slidable =
-      this.slideTotalWidth > this.el.offsetWidth &&
+      this.slideTotalWidth > Math.round(this.el.getBoundingClientRect().width) &&
       (!this.params.breakpoint || window.innerWidth <= this.params.breakpoint);
     Object.assign(this.params, params);
     this.init();

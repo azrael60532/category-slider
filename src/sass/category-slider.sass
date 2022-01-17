@@ -3,7 +3,6 @@
   display: inline-block
   max-width: 100%
   overflow: hidden
-  border-bottom: 1px solid #000
   &.slidable
     &::before,&::after
       content: ''
@@ -17,11 +16,11 @@
     &::before
       top: 0
       left: 0
-      background: linear-gradient(90deg,#fff 55%,rgba(255,255,255,0))
+      background: linear-gradient(90deg,#fff 10%,rgba(255,255,255,0))
     &::after
       top: 0
       right: 0
-      background: linear-gradient(270deg,#fff 55%,rgba(255,255,255,0))
+      background: linear-gradient(270deg,#fff 10%,rgba(255,255,255,0))
     .wrapper
       cursor: grab
       &.dragging
@@ -47,6 +46,3 @@
     user-select: none
     .item
       flex-shrink: 0
-      &.active
-        a
-          color: red

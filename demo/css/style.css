@@ -1,3 +1,9 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Noto Sans TC', sans-serif;
 }
@@ -19,13 +25,24 @@ main {
 }
 
 .category-navbar {
-  /* max-width: 400px; */
   width: 100%;
   text-align: center;
   margin: 0 auto;
 }
 
+.category-slider {
+  border-bottom: 1px solid #000;
+}
+
+.category-slider .wrapper .item:not(:first-child) {
+  margin-left: 20px;
+}
+
 .category-slider .wrapper .item a {
   display: block;
-  padding: 10px;
+  padding: 10px 0;
+}
+
+.category-slider .wrapper .item.active a {
+  color: red;
 }
