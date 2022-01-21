@@ -54,7 +54,7 @@ function getSlideTotalW(element) {
     const style = getComputedStyle(item);
     const marginL = parseInt(style.marginLeft);
     const marginR = parseInt(style.marginRight);
-    slideTotalWidth += item.offsetWidth + marginL + marginR;
+    slideTotalWidth += item.getBoundingClientRect().width + marginL + marginR;
   });
   return slideTotalWidth;
 }
@@ -174,7 +174,7 @@ function disableLinkDrag(element) {
 
 export class CategorySlider {
   constructor(element, params) {
-    this.el = document.querySelector(element);
+    this.el = typeof element === 'string' ? document.querySelector(element) : element;
     this.slideWrapEl = this.el.querySelector('.wrapper');
     // default params
     this.params = {
@@ -183,6 +183,8 @@ export class CategorySlider {
       clickSwitch: true,
       breakpoint: false,
     };
+    Object.assign(this.params, params);
+
     this.draggable = true;
     this.isDown = false; //按下
     this.startX = 0; //按下初始位置
@@ -190,12 +192,13 @@ export class CategorySlider {
     this.slideTotalWidth = getSlideTotalW(this.el);
     this.translateMin = 0;
     this.translateMax = -Math.floor(
-      Math.abs(getSlideTotalW(this.el) - this.el.querySelector('.wrapper').offsetWidth)
+      Math.abs(
+        getSlideTotalW(this.el) - this.el.querySelector('.wrapper').getBoundingClientRect().width
+      )
     );
     this.slidable =
       this.slideTotalWidth > Math.round(this.el.getBoundingClientRect().width) &&
       (!this.params.breakpoint || window.innerWidth <= this.params.breakpoint);
-    Object.assign(this.params, params);
     this.init();
   }
   init() {
@@ -206,22 +209,7 @@ export class CategorySlider {
       self.moveActive();
     }
     window.addEventListener('resize', function () {
-      self.translateMax = -Math.floor(
-        Math.abs(getSlideTotalW(self.el) - self.el.querySelector('.wrapper').offsetWidth)
-      );
-      self.slidable =
-        self.slideTotalWidth > self.el.offsetWidth &&
-        (!self.params.breakpoint || window.innerWidth <= self.params.breakpoint);
-      if (self.slidable) {
-        self.slideWrapEl.style.width = `${self.slideTotalWidth}px`;
-        self.el.classList.add('slidable');
-        self.moveActive();
-      } else {
-        self.el.classList.remove('slidable');
-        self.el.classList.remove('is-start');
-        self.el.classList.remove('is-end');
-        self.slideWrapEl.removeAttribute('style');
-      }
+      self.update();
     });
     eventHandler(self);
     disableLinkDrag(self.el);
@@ -245,44 +233,44 @@ export class CategorySlider {
         };
         Object.assign(self.slideWrapEl.style, styles);
       }
-    }
-    if (speed) {
-      self.slideWrapEl.addEventListener(
-        'transitionend',
-        function () {
-          self.nowTranslateX = getTranslateValues(self.slideWrapEl).x;
-          switch (detectPos(self)) {
-            case 'is-start':
-              self.el.classList.add('is-start');
-              self.el.classList.remove('is-end');
-              break;
-            case 'is-middle':
-              self.el.classList.remove('is-start');
-              self.el.classList.remove('is-end');
-              break;
-            case 'is-end':
-              self.el.classList.remove('is-start');
-              self.el.classList.add('is-end');
-              break;
-          }
-        },
-        false
-      );
-    } else {
-      self.nowTranslateX = getTranslateValues(self.slideWrapEl).x;
-      switch (detectPos(self)) {
-        case 'is-start':
-          self.el.classList.add('is-start');
-          self.el.classList.remove('is-end');
-          break;
-        case 'is-middle':
-          self.el.classList.remove('is-start');
-          self.el.classList.remove('is-end');
-          break;
-        case 'is-end':
-          self.el.classList.remove('is-start');
-          self.el.classList.add('is-end');
-          break;
+      if (speed) {
+        self.slideWrapEl.addEventListener(
+          'transitionend',
+          function () {
+            self.nowTranslateX = getTranslateValues(self.slideWrapEl).x;
+            switch (detectPos(self)) {
+              case 'is-start':
+                self.el.classList.add('is-start');
+                self.el.classList.remove('is-end');
+                break;
+              case 'is-middle':
+                self.el.classList.remove('is-start');
+                self.el.classList.remove('is-end');
+                break;
+              case 'is-end':
+                self.el.classList.remove('is-start');
+                self.el.classList.add('is-end');
+                break;
+            }
+          },
+          false
+        );
+      } else {
+        self.nowTranslateX = getTranslateValues(self.slideWrapEl).x;
+        switch (detectPos(self)) {
+          case 'is-start':
+            self.el.classList.add('is-start');
+            self.el.classList.remove('is-end');
+            break;
+          case 'is-middle':
+            self.el.classList.remove('is-start');
+            self.el.classList.remove('is-end');
+            break;
+          case 'is-end':
+            self.el.classList.remove('is-start');
+            self.el.classList.add('is-end');
+            break;
+        }
       }
     }
   }
@@ -309,6 +297,29 @@ export class CategorySlider {
           transform: `translate3d(${self.translateMax}px,0,0)`,
         });
         break;
+    }
+  }
+  update() {
+    const self = this;
+    self.el.querySelector('.wrapper').removeAttribute('style');
+    self.slideTotalWidth = getSlideTotalW(self.el);
+    self.translateMax = -Math.floor(
+      Math.abs(
+        getSlideTotalW(self.el) - self.el.querySelector('.wrapper').getBoundingClientRect().width
+      )
+    );
+    self.slidable =
+      self.slideTotalWidth > Math.round(self.el.getBoundingClientRect().width) &&
+      (!self.params.breakpoint || window.innerWidth <= self.params.breakpoint);
+    if (self.slidable) {
+      self.slideWrapEl.style.width = `${self.slideTotalWidth}px`;
+      self.el.classList.add('slidable');
+      self.moveActive();
+    } else {
+      self.el.classList.remove('slidable');
+      self.el.classList.remove('is-start');
+      self.el.classList.remove('is-end');
+      self.slideWrapEl.removeAttribute('style');
     }
   }
 }
